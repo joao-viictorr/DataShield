@@ -1,15 +1,23 @@
 import csv
+import os
+
+from data_filter import data_filter
+
+caminho_csv = "dados_2020.csv"
+if not os.path.isfile(caminho_csv):
+    data_filter()
 
 map_parlamentar = {}
 contador_parlamentar = 1
 
 map_estado_regiao = {
-    "norte": ["AC", "AM", "AP", "PA", "RO", "RR", "TO"],
-    "nordeste": ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"],
-    "centro-oeste": ["DF", "GO", "MS", "MT"],
-    "sudeste": ["ES", "MG", "RJ", "SP"],
-    "sul": ["PR", "RS", "SC"],
+    "Norte": ["AC", "AM", "AP", "PA", "RO", "RR", "TO"],
+    "Nordeste": ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"],
+    "Centro-oeste": ["DF", "GO", "MS", "MT"],
+    "Sudeste": ["ES", "MG", "RJ", "SP"],
+    "Sul": ["PR", "RS", "SC"],
 }
+
 
 def anonimizar_parlamentar(nome):
     global contador_parlamentar
@@ -22,10 +30,26 @@ def anonimizar_parlamentar(nome):
         contador_parlamentar += 1
         return anonimizar_parlamentar(nome)
 
+
 def anonimizar_estado(uf):
     for regiao, estados in map_estado_regiao.items():
         if uf in estados:
             return regiao
+
+
+def salvar_csv_anonimizado(lista_dados, caminho_saida):
+    if not lista_dados:
+        return
+
+    chaves = lista_dados[0].keys()
+
+    with open(caminho_saida, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=chaves)
+        writer.writeheader()
+        writer.writerows(lista_dados)
+
+    print(f"CSV anonimizado salvo em {caminho_saida}")
+
 
 def processar_csv(caminho_csv):
     lista_dados = []
@@ -60,14 +84,7 @@ def processar_csv(caminho_csv):
 
     return lista_dados
 
-caminho_csv = "dados_2020.csv"
-lista_dados = processar_csv(caminho_csv)
 
-i = 0
-for dado in lista_dados:
-    print(dado)
-
-    i += 1
-
-    if i == 100:
-        break
+if not os.path.isfile('dados_2020_anonimizado.csv'):
+    lista_dados = processar_csv(caminho_csv)
+    salvar_csv_anonimizado(lista_dados, 'dados_2020_anonimizado.csv')
